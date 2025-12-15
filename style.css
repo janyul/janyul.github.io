@@ -1,0 +1,13 @@
+
+
+
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: none;   /* 이미지를 클릭할 수 없게 함 (선택적) */
+}
+
+body {
+  -webkit-user-select: none;
+  user-select: none;
+}

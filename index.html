@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Mr.</title>
+  <style>
+    body {
+      background: white;
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      font-family: "Courier New", monospace;
+    }
+    
+    /* 캐릭터 크기 축소 */
+    #character {
+      width: 120px;   /* 원래 220px → 더 작게 */
+      cursor: pointer;
+      user-select: none;
+      display: block;
+      position: fixed;
+      right: 320px;   /* 화면 오른쪽에서 띄우는 정도 */
+      bottom: 60px;
+    }
+
+    /* 스위치 크기 축소 및 캐릭터 오른쪽 배치 */
+    #switch {
+      width: 50px;    /* 더 작게 */
+      margin-left: 130px; /* 캐릭터 오른쪽으로 이동 */
+      margin-top: -150px; /* 위로 당겨서 옆에 딱 붙게 */
+      cursor: pointer;
+      opacity: 0.7;
+      position: fixed;
+      right: 250px;   /* 화면 오른쪽에서 띄우는 정도 */
+      bottom: 230px;
+      opacity: 0.5;            /* 비활성화 느낌 */
+      cursor: default;         /* 클릭 불가 커서 */
+      pointer-events: none;    /* 클릭 안 됨 */
+    }
+
+    /* 텍스트는 캐릭터 왼편에 뜨도록 */
+    #text-box {
+      position: absolute;
+      right: 460px;      /* 캐릭터 왼쪽 */
+      bottom: 230px;
+      font-size: 12px;
+      line-height: 26px;
+      white-space: pre-line;
+      text-align: right;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div id="viewport">
+    <div id="stage">
+      
+      <div class="wrap">
+        <img id="character" src="character.png" alt="캐릭터">
+        <img id="switch" src="switch.png" alt="스위치">
+        <div id="text-box"></div>
+      </div>
+      </div>
+  </div>
+
+<script>
+  // 캐릭터 대사 목록
+  const messages = [
+    "- hi -",
+    "- my name is mr. -",
+    "- u can click that switch -"
+  ];
+
+  // 🔊 문장별 사운드 (1:1 대응)
+  const sounds = [
+    "s1.wav",
+    "s2.wav",
+    "s3.wav"
+  ];
+
+  let index = 0;
+  let switchUnlocked = false;
+  let currentAudio = null;   // 🔊 현재 재생 중인 사운드
+
+  const textBox = document.getElementById("text-box");
+  const character = document.getElementById("character");
+  const switchBtn = document.getElementById("switch");
+
+  // 한 글자씩 타이핑하는 함수
+  function typeLine(text, soundSrc, callback) {
+    let charIndex = 0;
+
+    // 🔊 이전 사운드 정지
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+
+    // 🔊 이번 문장 사운드 재생
+    currentAudio = new Audio(soundSrc);
+    // 브라우저 정책상 자동 재생 오류 방지를 위해 catch 추가
+    currentAudio.play().catch(e => console.log("Audio autoplay blocked:", e));
+
+    function typeChar() {
+      if (charIndex < text.length) {
+        textBox.innerHTML += text.charAt(charIndex);
+        charIndex++;
+        setTimeout(typeChar, 40); // 글자 찍는 속도
+      } else {
+        textBox.innerHTML += "\n";
+        // 문장 출력이 끝나면 콜백 실행
+        if (callback) callback();
+      }
+    }
+
+    typeChar();
+  }
+
+  // 자동으로 대사를 순서대로 출력하는 함수
+  function playSequence() {
+    if (index < messages.length) {
+      typeLine(messages[index], sounds[index], () => {
+        index++; // 다음 문장 인덱스로 증가
+
+        if (index === messages.length) {
+          // 모든 문장이 끝났으면 스위치 활성화
+          switchUnlocked = true;
+          switchBtn.style.opacity = "1";
+          switchBtn.style.cursor = "pointer";
+          switchBtn.style.pointerEvents = "auto";
+        } else {
+          // 아직 문장이 남았다면 잠시 쉬었다가(0.5초) 다음 문장 재생
+          setTimeout(playSequence, 500);
+        }
+      });
+    }
+  }
+
+  // 페이지 로드 후 1.5초 뒤에 자동 시작
+  setTimeout(() => {
+    playSequence();
+  }, 1500);
+
+  // 스위치 클릭 이벤트 (기존 유지)
+  switchBtn.addEventListener("click", () => {
+    if (!switchUnlocked) return;
+
+    // 🔊 화면 전환 전 사운드 정지
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+
+    window.location.href = "next.html";
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Mr. – Page 2</title>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  overflow: hidden;
+  font-family: "Courier New", monospace;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#character {
+  width: 119px; 
+  cursor: pointer;
+  user-select: none;
+  display: block;
+  position: fixed;
+  right: 320px; 
+  bottom: 65px;
+  z-index: 1;
+}
+
+/* ★ [수정됨] 전등 이미지: 클릭 방지 (pointer-events: none) */
+/* 이미지가 스위치를 가리지 않도록 클릭을 통과시킵니다 */
+#light {
+  width: 270px; 
+  margin-left: 130px; 
+  margin-top: -150px; 
+  cursor: pointer;
+  position: fixed;
+  right: 225px; 
+  bottom: 260px;
+  z-index: 1;
+  pointer-events: none; /* 핵심: 여기가 클릭되지 않게 함 */
+}
+
+/* ★ [추가됨] 전등 상단 1/3을 담당할 투명 버튼 */
+#light-trigger {
+  position: fixed;
+  width: 270px;    /* 전등 너비와 동일 */
+  height: 150px;   /* 전등 상단 갓 부분의 높이 (조절 가능) */
+  right: 225px;    /* 전등과 같은 좌우 위치 */
+  bottom: 580px;   /* 전등 이미지의 위쪽으로 위치를 잡음 (조절 가능) */
+  z-index: 10;     /* 다른 것보다 위에 오도록 */
+  cursor: pointer;
+  background: transparent; /* 투명 */
+  
+  /* 위치 확인이 필요하면 아래 한 줄 주석을 풀고 빨간 박스를 확인하세요 */
+   /*background: rgba(255, 0, 0, 0.3); */
+}
+
+#switch {
+  width: 50px; 
+  margin-left: 130px; 
+  margin-top: -150px; 
+  cursor: pointer;
+  position: fixed;
+  right: 250px; 
+  bottom: 230px;
+  z-index: 1; /* 스위치가 확실히 눌리도록 z-index 높임 */
+}
+
+
+#bed {
+  width: 210px; 
+  margin-left: 130px; 
+  margin-top: -150px; 
+  cursor: pointer;
+  position: fixed;
+  right: 485px; 
+  bottom: 80px;
+  z-index: 1;
+}
+
+#window {
+  width: 225px; 
+  margin-left: 130px; 
+  margin-top: -150px; 
+  cursor: pointer;
+  position: fixed;
+  right: 475px; 
+  bottom: 393px;
+  z-index: 1;
+  transition: filter 0.3s ease; 
+}
+
+#window:hover {
+  filter: brightness(60%);
+}
+
+#sheet {
+  width: 690px; 
+  margin-left: 130px; 
+  margin-top: -150px; 
+  cursor: pointer;
+  position: fixed;
+  right: 760px; 
+  bottom: 79px;
+  z-index: 0;
+}
+
+#text-box {
+  position: fixed;
+  right: 460px;      
+  bottom: 230px;
+  font-size: 12px;
+  line-height: 26px;
+  white-space: pre-line;
+  text-align: right;
+  font-family: "Courier New", monospace;
+  z-index: 10;
+}
+
+#dot-container {
+  width: 690px;
+  height: 690px;
+  margin-left: 130px;
+  margin-top: -150px;
+  position: fixed;
+  right: 760px;
+  bottom: 79px;
+  pointer-events: none; 
+  z-index: 5;
+}
+
+.dot {
+  width: 60px;
+  height: 60px;
+  background-color: black;
+  border-radius: 50%;
+  position: absolute; 
+  opacity: 0;
+  background-size: cover;     
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: auto; 
+}
+
+#final-text {
+  position: fixed; 
+  right: 100px;    
+  bottom: 190px;   
+  font-size: 9pt;         
+  color: #555555;         
+  font-family: "Courier New", monospace;
+  text-align: center;     
+  opacity: 0;             
+  transition: opacity 1s ease; 
+  pointer-events: none;   
+  z-index: 20;            
+}
+
+#popup-window {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  background: transparent;
+  right: 935px;   
+  bottom: 236px;  
+}
+
+#popup-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;   
+  height: 25px;
+  cursor: pointer;
+  background: transparent; 
+}
+
+#popup-content {
+  width: 344px;
+  height: 236px;
+  display: block;
+}
+
+</style>
+</head>
+
+<body>
+
+  <div id="scene">
+    <img id="character" src="man1.png" alt="character">
+    <img id="switch" src="switch1.png" alt="switch">
+    <img id="light" src="light1.png" alt="light">
+    <div id="light-trigger"></div>
+    
+    <img id="bed" src="bed1.png" alt="bed">
+    <img id="window" src="window1.png" alt="window">
+    <img id="sheet" src="sheet.png" alt="sheet">
+    
+    <div id="dot-container"></div>
+    <div id="text-box"></div>
+    <div id="final-text">
+      - When you start to get bored,<br>
+      click the switch again -
+    </div>
+
+    <div id="popup-window">
+      <div id="popup-close"></div> 
+      <img id="popup-content" src="" alt="Popup Image">
+    </div>
+  </div>
+
+<script>
+  // 1. 오프닝 대사
+  const messages = [
+    "- this is my room -",
+    "- pls look around -",
+    "- u can click on everything -"
+  ];
+  const sounds = [ "s4.wav", "s5.wav", "s6.wav" ];
+
+  // 2. 침대 클릭 대사
+  const bedMessages = [
+    "- r u curious about my bed -",
+    "- unfortunately -",
+    "- it only works at night-"
+  ];
+  const bedSounds = [ "s7.wav", "s8.wav", "s9.wav" ];
+
+  // 3. 전등 클릭 대사
+  const lightMessage = "- it's just a light -";
+  const lightSound = "s10.wav";
+
+  // 4. 창문 클릭 대사
+  const windowMessages = [
+    "- hey -",
+    "- i had a really hard time these days -",
+    "- next time u visit here, -",
+    "- i promise i’ll open this window too -",
+    "- but not today….. -"
+  ];
+  const windowSounds = [ "s11.wav", "s12.wav", "s13.wav", "s14.wav", "s15.wav" ];
+
+
+  const textBox = document.getElementById("text-box");
+  const switchObj = document.getElementById("switch");
+  const bedObj = document.getElementById("bed");
+  // ★ [수정됨] lightObj를 이미지가 아니라 '투명 버튼'으로 변경
+  const lightObj = document.getElementById("light-trigger"); 
+  const windowObj = document.getElementById("window");
+  
+  // 스위치 클릭 -> 페이지 이동
+  switchObj.addEventListener("click", () => {
+    window.location.href = "bam.html";
+  });
+
+  // 침대 클릭 -> 대사 출력
+  bedObj.addEventListener("click", () => {
+    textBox.innerHTML = "";
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
+    playBedSequence(0);
+  });
+
+  // 전등 클릭 -> 대사 출력 (이제 상단 투명 버튼을 눌러야 실행됨)
+  lightObj.addEventListener("click", () => {
+    textBox.innerHTML = "";
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
+    typeLine(lightMessage, lightSound);
+  });
+
+  // 창문 클릭 -> 대사 출력
+  windowObj.addEventListener("click", () => {
+    textBox.innerHTML = "";
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
+    playWindowSequence(0);
+  });
+
+
+  function playBedSequence(idx) {
+    if (idx >= bedMessages.length) return; 
+    typeLine(bedMessages[idx], bedSounds[idx], () => {
+        setTimeout(() => {
+            playBedSequence(idx + 1);
+        }, 300);
+    });
+  }
+
+  function playWindowSequence(idx) {
+    if (idx >= windowMessages.length) return; 
+    typeLine(windowMessages[idx], windowSounds[idx], () => {
+        setTimeout(() => {
+            playWindowSequence(idx + 1);
+        }, 300);
+    });
+  }
+
+
+  let index = 0;
+  let currentAudio = null;
+  let isTyping = false;
+
+  function typeLine(text, soundSrc, callback) {
+    let charIndex = 0;
+    isTyping = true;
+
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+
+    currentAudio = new Audio(soundSrc);
+    
+    const playPromise = currentAudio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        console.log("오디오 자동 재생이 차단되었습니다.");
+      });
+    }
+
+    function typeChar() {
+      if (charIndex < text.length) {
+        textBox.innerHTML += text.charAt(charIndex);
+        charIndex++;
+        setTimeout(typeChar, 40); 
+      } else {
+        textBox.innerHTML += "\n";
+        isTyping = false;
+        if (callback) callback();
+      }
+    }
+
+    typeChar();
+  }
+
+  function playNextLine() {
+    if (index >= messages.length) {
+      setTimeout(() => {
+        createDots(); 
+      }, 500);
+      return;
+    }
+
+    if (isTyping) return;
+
+    typeLine(messages[index], sounds[index], () => {
+      index++;
+      setTimeout(playNextLine, 300);
+    });
+  }
+
+  function animateWindow(callback) {
+    const win = document.getElementById("window");
+    const images = [
+      "window1.png", 
+      "window2.png", 
+      "window3.png", 
+      "window4.png", 
+      "window5.png"
+    ];
+
+    let stepIndex = 0;
+    const speed = 80; 
+
+    const timer = setInterval(() => {
+      if (stepIndex < images.length) {
+        win.src = images[stepIndex];
+        stepIndex++;
+      } else {
+        clearInterval(timer);
+        if (callback) callback(); 
+      }
+    }, speed);
+  }
+
+  function createDots() {
+    const container = document.getElementById("dot-container");
+    const popupWindow = document.getElementById("popup-window");
+    const popupContent = document.getElementById("popup-content");
+    const popupClose = document.getElementById("popup-close");
+
+    if(popupClose) {
+        popupClose.addEventListener("click", () => {
+          popupWindow.style.display = "none";
+        });
+    }
+
+    const positions = [
+      { top: 152, left: 274, popup: "c1.png" }, 
+      { top: 228, left: 187, popup: "c2.png" }, 
+      { top: 307, left: 101, popup: "c3.png" }, 
+      { top: 385, left: 101, popup: "c4.png" }, 
+      { top: 462, left: 101, popup: "c5.png" },
+      { top: 540, left: 101, popup: "c6.png" }, 
+      { top: 540, left: 187, popup: "c7.png" }, 
+      { top: 540, left: 274, popup: "c8.png" },
+      { top: 540, left: 359, popup: "c8.png" },
+      { top: 540, left: 443, popup: "c7.png" },
+      { top: 540, left: 528, popup: "c6.png" }, 
+      { top: 462, left: 528, popup: "c5.png" },
+      { top: 385, left: 528, popup: "c4.png" },
+      { top: 307, left: 528, popup: "c3.png" }, 
+      { top: 228, left: 443, popup: "c2.png" },
+      { top: 152, left: 359, popup: "c1.png" }, 
+    ];
+
+    const totalDots = positions.length; 
+    const interval = 80; 
+    
+    positions.forEach((pos, i) => {
+      const dot = document.createElement("div");
+      dot.classList.add("dot");
+      
+      dot.style.top = pos.top + "px";
+      dot.style.left = pos.left + "px";
+      dot.style.transition = "none"; 
+      
+      const hoverImgSrc = "j" + (i + 1) + ".png"; 
+      const popupImgSrc = pos.popup;
+
+      dot.addEventListener("mouseover", () => {
+        dot.style.backgroundColor = "transparent"; 
+        dot.style.backgroundImage = `url('${hoverImgSrc}')`; 
+      });
+
+      dot.addEventListener("mouseout", () => {
+        dot.style.backgroundImage = "none"; 
+        dot.style.backgroundColor = "black"; 
+      });
+
+      dot.addEventListener("click", () => {
+        popupContent.src = popupImgSrc; 
+        popupWindow.style.display = "block"; 
+      });
+
+      container.appendChild(dot);
+
+      setTimeout(() => {
+        dot.style.opacity = "1";
+      }, i * interval);
+    });
+
+    const totalTimeForDots = totalDots * interval;
+
+    setTimeout(() => {
+      animateWindow(() => {
+        const finalText = document.getElementById("final-text");
+        const hahaSound = new Audio("haha.wav"); 
+        
+        if (finalText) {
+            finalText.style.opacity = "1"; 
+        }
+        
+        const playPromise = hahaSound.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(e => console.log("마지막 사운드 재생 차단됨"));
+        }
+      });
+      
+    }, totalTimeForDots + 500);
+  }
+
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      playNextLine();
+    }, 2000);
+  });
+</script>
+
+</body>
+</html>
